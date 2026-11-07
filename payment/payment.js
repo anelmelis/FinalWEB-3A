@@ -20,12 +20,19 @@ function readStore(key, fallback) {
   }
 }
 
+
+
 function writeStore(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-  }
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+
+    } catch (error) {
+        console.error("Could not save checkout data:", error);
+        return false;
+    }
 }
+
 
 function escapeHtml(text) {
   return String(text).replace(/[&<>"']/g, (ch) => ({
@@ -146,20 +153,399 @@ document.getElementById('card-exp').addEventListener('input', (event) => {
   event.target.value = digits.length > 2 ? `${digits.slice(0, 2)} / ${digits.slice(2)}` : digits;
 });
 
-formEl.addEventListener('submit', (event) => {
-  event.preventDefault();
-  if (lines.length === 0) return;
 
-  writeStore('md_cart', []);
-  writeStore('md_order', null);
 
-  formEl.hidden = true;
-  methodTabs.hidden = true;
-  successEl.hidden = false;
-  successEl.innerHTML = `
-    <strong>Thank you for your order!</strong><br>
-    Order ${orderNumber} is confirmed. This is a demo store, so no payment was made.`;
+
+// ========================================
+// ENDTERM - CUSTOM FORM VALIDATION
+// ========================================
+
+// Disable default browser validation
+formEl.noValidate = true;
+
+
+// Show error beside the input
+function showFieldError(field, message) {
+
+    const wrapper = field.closest(".field");
+
+    if (!wrapper) return;
+
+    let error = wrapper.querySelector(".field-error");
+
+    if (!error) {
+        error = document.createElement("p");
+        error.className = "field-error";
+        error.setAttribute("role", "alert");
+        wrapper.appendChild(error);
+    }
+
+    error.textContent = message;
+
+    field.classList.toggle(
+        "invalid-field",
+        Boolean(message)
+    );
+
+    field.setAttribute(
+        "aria-invalid",
+        message ? "true" : "false"
+    );
+}
+
+
+// Show general checkout error
+function showCheckoutError(message) {
+
+    let messageEl =
+        document.getElementById("checkout-error");
+
+    if (!messageEl) {
+
+        messageEl = document.createElement("p");
+
+        messageEl.id = "checkout-error";
+        messageEl.className = "checkout-error";
+
+        messageEl.setAttribute("role", "alert");
+
+        submitBtn.insertAdjacentElement(
+            "afterend",
+            messageEl
+        );
+    }
+
+    messageEl.textContent = message;
+}
+
+
+// Clear previous errors
+function clearValidation() {
+
+    formEl.querySelectorAll("input, select")
+        .forEach((field) => {
+            showFieldError(field, "");
+        });
+
+    showCheckoutError("");
+}
+
+
+// ========================================
+// VALIDATE PAYMENT FORM
+// ========================================
+
+function validatePaymentForm() {
+
+    clearValidation();
+
+    let valid = true;
+    let firstInvalid = null;
+
+    function reject(field, message) {
+
+        showFieldError(field, message);
+
+        if (!firstInvalid) {
+            firstInvalid = field;
+        }
+
+        valid = false;
+    }
+
+
+    // Validate email
+    const email = emailEl.value.trim();
+
+    if (!email) {
+
+        reject(emailEl, "Email is required.");
+
+    } else if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+
+        reject(
+            emailEl,
+            "Enter a valid email address."
+        );
+    }
+
+
+    // CARD VALIDATION
+    if (method === "card") {
+
+        const numberEl =
+            document.getElementById("card-number");
+
+        const expiryEl =
+            document.getElementById("card-exp");
+
+        const cvcEl =
+            document.getElementById("card-cvc");
+
+
+        // Card number
+        const digits =
+            numberEl.value.replace(/\D/g, "");
+
+        if (!/^\d{16}$/.test(digits)) {
+
+            reject(
+                numberEl,
+                "Enter a 16-digit test card number."
+            );
+        }
+
+
+        // Expiration date
+        const match = expiryEl.value
+            .trim()
+            .match(/^(\d{2}) \/ (\d{2})$/);
+
+        if (!match) {
+
+            reject(
+                expiryEl,
+                "Use the format MM / YY."
+            );
+
+        } else {
+
+            const month = Number(match[1]);
+            const year = 2000 + Number(match[2]);
+
+            const now = new Date();
+
+            const expired =
+                year < now.getFullYear() ||
+                (
+                    year === now.getFullYear() &&
+                    month < now.getMonth() + 1
+                );
+
+            if (
+                month < 1 ||
+                month > 12 ||
+                expired
+            ) {
+
+                reject(
+                    expiryEl,
+                    "Enter a valid future expiration date."
+                );
+            }
+        }
+
+
+        // Security code
+        if (
+            !/^\d{3,4}$/.test(cvcEl.value.trim())
+        ) {
+
+            reject(
+                cvcEl,
+                "Enter a 3- or 4-digit test security code."
+            );
+        }
+    }
+
+
+    // CRYPTO VALIDATION
+    else if (method === "crypto") {
+
+        const walletEl =
+            document.getElementById("wallet");
+
+        if (!coinEl.value) {
+
+            reject(
+                coinEl,
+                "Select a coin."
+            );
+        }
+
+        if (walletEl.value.trim().length < 10) {
+
+            reject(
+                walletEl,
+                "Enter a demo wallet address (10+ characters)."
+            );
+        }
+    }
+
+
+    // Focus first invalid field
+    if (firstInvalid) {
+        firstInvalid.focus();
+    }
+
+    return valid;
+}
+
+
+// ========================================
+// CLEAR ERRORS WHEN USER TYPES
+// ========================================
+
+formEl.addEventListener("input", (event) => {
+
+    const field = event.target;
+
+    if (field.matches("input, select")) {
+        showFieldError(field, "");
+    }
+
 });
+
+
+formEl.addEventListener("change", (event) => {
+
+    const field = event.target;
+
+    if (field.matches("input, select")) {
+        showFieldError(field, "");
+    }
+
+});
+
+
+methodTabs.addEventListener(
+    "click",
+    clearValidation
+);
+
+
+// ========================================
+// ENDTERM - SAVE ORDER HISTORY
+// ========================================
+
+function saveCompletedOrder() {
+
+    const storedOrders =
+        readStore("md_orders", []);
+
+    const orders = Array.isArray(storedOrders)
+        ? storedOrders
+        : [];
+
+
+    // Avoid duplicate orders
+    if (
+        orders.some(
+            order => order.id === orderNumber
+        )
+    ) {
+        return true;
+    }
+
+
+    // Create order object
+    const order = {
+
+        id: orderNumber,
+
+        date: new Date().toISOString(),
+
+        items: lines.map((line) => ({
+
+            id: line.id,
+            name: line.name,
+            price: Number(line.price),
+            qty: Number(line.qty)
+
+        })),
+
+        total: Number(total.toFixed(2)),
+
+        status: "Processing",
+
+        email: emailEl.value.trim(),
+
+        method: paymentName()
+    };
+
+
+    // Save only order details,
+    // never card or wallet information
+    return writeStore(
+        "md_orders",
+        [...orders, order]
+    );
+}
+
+
+
+
+
+
+
+// ========================================
+// ENDTERM - PAYMENT SUBMISSION
+// ========================================
+
+formEl.addEventListener("submit", (event) => {
+
+    event.preventDefault();
+
+
+    // Check shopping cart
+    if (lines.length === 0) {
+
+        showCheckoutError(
+            "Your cart is empty. Add a product in Booking."
+        );
+
+        return;
+    }
+
+
+    // Validate form before payment
+    if (!validatePaymentForm()) {
+        return;
+    }
+
+
+    // Save order to Profile history
+    if (!saveCompletedOrder()) {
+
+        showCheckoutError(
+            "Could not save the demo order. Please try again."
+        );
+
+        return;
+    }
+
+
+    // Clear shopping cart
+    writeStore("md_cart", []);
+
+    writeStore("md_order", null);
+
+
+    // Hide form and payment methods
+    formEl.hidden = true;
+    methodTabs.hidden = true;
+
+
+    // Show success message
+    successEl.hidden = false;
+
+    successEl.innerHTML = `
+        <strong>Thank you for your order!</strong>
+        <br>
+        Order ${escapeHtml(orderNumber)} is confirmed.
+        This is a demo store: no money was charged.
+        <br>
+        <a href="../profile/profile.html">
+            View Order History in Profile
+        </a>
+    `;
+
+});
+
+
+
 
 if (user && user.email) emailEl.value = user.email;
 updateForm();

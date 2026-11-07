@@ -123,3 +123,45 @@ h1 { margin: 0; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.25; }
 .receipt__item span:first-child { color: #EAF0E0; }
 .receipt__total { font-size: 1.2rem; font-weight: 700; color: #fff; }
 .receipt__total span:first-child { color: #fff; }
+
+
+/* ========================================
+   ENDTERM - FORM VALIDATION
+======================================== */
+
+.field-error {
+    margin: 0;
+    color: #9c2626;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.field-error:empty {
+    display: none;
+}
+
+.field input.invalid-field,
+.field select.invalid-field {
+    border-color: #b42318;
+    box-shadow: 0 0 0 2px rgba(180, 35, 24, 0.12);
+}
+
+.checkout-error {
+    margin: 0;
+    padding: 10px 14px;
+    color: #7f1d1d;
+    background: #fff0f0;
+    border: 1px solid #f1b0b0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.checkout-error:empty {
+    display: none;
+}
+
+#success a {
+    color: #1f633e;
+    text-decoration: underline;
+    font-weight: 700;
+}
