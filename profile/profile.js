@@ -274,3 +274,18 @@ function renderOrderHistory() {
 
 // Load order history
 renderOrderHistory();
+
+
+
+// ========================================
+// LOG OUT
+// ========================================
+
+const profileLogoutBtn =
+    document.getElementById("profileLogoutBtn");
+
+profileLogoutBtn.addEventListener("click", () => {
+    localStorage.removeItem("md_user");
+    localStorage.removeItem("profileName");
+    localStorage.removeItem("profileEmail");
+});
