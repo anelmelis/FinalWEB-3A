@@ -1,4 +1,74 @@
 // ========================================
+// DYNAMIC PRODUCT RENDERING
+// ========================================
+
+function renderProducts() {
+    const productsGrid = document.getElementById("productsGrid");
+
+    productsGrid.innerHTML = "";
+
+    products.forEach((product) => {
+        const productCard = document.createElement("div");
+
+        productCard.className =
+            "col-12 col-sm-6 col-lg-3 product-wrapper";
+
+        productCard.dataset.category = product.category;
+        productCard.dataset.name = product.name;
+
+        productCard.innerHTML = `
+            <article class="product-card">
+
+                <div class="product-image">
+                    <img src="${product.image}" alt="${product.name}">
+                </div>
+
+                <div class="product-info">
+                    <div>
+                        <h3>${product.name}</h3>
+                        <p>${product.shortDescription}</p>
+                    </div>
+
+                    <span class="product-price">
+                        $${product.price}
+                    </span>
+                </div>
+
+                <div class="product-actions">
+
+                    <button
+                        class="save-btn"
+                        type="button"
+                        data-id="${product.id}"
+                        data-name="${product.name}"
+                        data-description="${product.shortDescription}"
+                        data-price="$${product.price}"
+                        data-category="${product.category}"
+                        data-image="${product.image}"
+                    >
+                        ♡ SAVE
+                    </button>
+
+                    <button
+                        class="details-btn"
+                        type="button"
+                        data-name="${product.name}"
+                        data-description="${product.description}"
+                        data-price="$${product.price}"
+                        data-category="${product.categoryLabel}"
+                    >
+                        DETAILS
+                    </button>
+
+                </div>
+            </article>
+        `;
+
+        productsGrid.appendChild(productCard);
+    });
+}
+
+renderProducts();// ========================================
 // ELEMENTS
 // ========================================
 
@@ -414,3 +484,62 @@ categoryButtons.forEach(
 
     }
 );
+
+
+// ========================================
+// SORT PRODUCTS BY PRICE
+// ========================================
+
+const sortSelect = document.getElementById("sortProducts");
+const sortGrid = document.getElementById("productsGrid");
+
+// Remember the original product order
+const originalProductOrder = Array.from(sortGrid.children);
+
+function sortProductCards() {
+
+    const cards = Array.from(
+        sortGrid.querySelectorAll(".product-wrapper")
+    );
+
+    const sortType = sortSelect.value;
+
+    cards.sort((a, b) => {
+
+        // Restore original order
+        if (sortType === "default") {
+            return originalProductOrder.indexOf(a)
+                 - originalProductOrder.indexOf(b);
+        }
+
+        // Get product prices
+        const priceA = parseFloat(
+            a.querySelector(".save-btn").dataset.price.replace("$", "")
+        );
+
+        const priceB = parseFloat(
+            b.querySelector(".save-btn").dataset.price.replace("$", "")
+        );
+
+        // Low to high
+        if (sortType === "low-high") {
+            return priceA - priceB;
+        }
+
+        // High to low
+        if (sortType === "high-low") {
+            return priceB - priceA;
+        }
+
+        return 0;
+    });
+
+    // Update product order on the page
+    cards.forEach(card => {
+        sortGrid.appendChild(card);
+    });
+
+}
+
+// Sort when the user changes the option
+sortSelect.addEventListener("change", sortProductCards);
