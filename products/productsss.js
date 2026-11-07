@@ -457,8 +457,11 @@ categoryButtons.forEach(
             "click",
             () => {
 
-                selectedCategory =
-                    button.dataset.category;
+                selectedCategory = categories.includes(button.dataset.category)
+                    ? button.dataset.category
+                    : "all";
+
+               
 
 
                 categoryButtons.forEach(
