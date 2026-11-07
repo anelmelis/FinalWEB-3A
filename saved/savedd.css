@@ -695,3 +695,87 @@ button {
     }
 
 }
+
+/* FINAL FEATURE: RECENTLY VIEWED HISTORY */
+.recently-viewed-section {
+    margin: 42px 0;
+    padding: 28px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.recently-viewed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.recently-viewed-header h2 {
+    margin: 0 0 6px;
+    font-size: 23px;
+    font-weight: 700;
+}
+
+.recently-viewed-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.clear-history-btn,
+.recently-viewed-remove {
+    border: 1px solid var(--green);
+    background: var(--green-soft);
+    color: var(--dark);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.clear-history-btn:hover:not(:disabled),
+.recently-viewed-remove:hover {
+    background: var(--green);
+    color: white;
+}
+
+.clear-history-btn:disabled { opacity: 0.5; cursor: default; }
+
+.recently-viewed-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg);
+}
+
+.recently-viewed-link { display: block; flex: 1; color: var(--dark); }
+.recently-viewed-link:hover { color: var(--green); }
+
+.recently-viewed-link img {
+    display: block;
+    width: 100%;
+    height: 155px;
+    object-fit: contain;
+    border-radius: 9px;
+    background: white;
+    margin-bottom: 12px;
+}
+
+.recently-viewed-link h3 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.recently-viewed-link p { margin: 0 0 14px; font-weight: 700; }
+.recently-viewed-remove { width: 100%; }
+.recently-viewed-empty { color: var(--muted); margin: 0; }
+.recently-viewed-empty[hidden] { display: none; }
+
+@media (max-width: 576px) {
+    .recently-viewed-section { padding: 18px; }
+    .recently-viewed-header h2 { font-size: 20px; }
+}

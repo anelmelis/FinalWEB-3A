@@ -52,6 +52,7 @@ function renderProducts() {
                     <button
                         class="details-btn"
                         type="button"
+                        data-id="${product.id}"
                         data-name="${product.name}"
                         data-description="${product.description}"
                         data-price="$${product.price}"
@@ -258,6 +259,9 @@ detailsButtons.forEach((button) => {
     button.addEventListener(
         "click",
         () => {
+
+            // Track an actual product view, not merely a product card impression.
+            window.MineDropRecent.add(button.dataset.id);
 
             modalName.textContent =
                 button.dataset.name;
@@ -546,3 +550,13 @@ function sortProductCards() {
 
 // Sort when the user changes the option
 sortSelect.addEventListener("change", sortProductCards);
+
+
+// Open a product from the Recently Viewed section on the Saved page.
+const requestedProductId = new URLSearchParams(window.location.search).get("product");
+if (requestedProductId) {
+    const detailsButton = [...detailsButtons].find(button =>
+        button.dataset.id === requestedProductId
+    );
+    if (detailsButton) detailsButton.click();
+}

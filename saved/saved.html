@@ -200,6 +200,25 @@
 
 
 
+    <!-- FINAL FEATURE: RECENTLY VIEWED (saved in localStorage) -->
+    <section class="recently-viewed-section" aria-labelledby="recentlyViewedTitle">
+        <div class="recently-viewed-header">
+            <div>
+                <h2 id="recentlyViewedTitle">RECENTLY VIEWED</h2>
+                <p>Products you opened recently. Your history stays after refresh.</p>
+            </div>
+            <button id="clearRecentlyViewed" class="clear-history-btn" type="button">
+                CLEAR HISTORY
+            </button>
+        </div>
+
+        <div class="row g-4" id="recentlyViewedGrid"></div>
+        <p id="emptyRecentlyViewed" class="recently-viewed-empty" role="status">
+            No recently viewed products yet. Open DETAILS on a product to start your history.
+        </p>
+    </section>
+
+
     <!-- RECOMMENDATIONS -->
 
     <section class="recommendations-section">
@@ -480,7 +499,10 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
 ></script>
 
+<script src="../products/products-data.js"></script>
+<script src="../products/recently-viewed.js"></script>
 <script src="savedd.js"></script>
+<script src="recently-viewed-ui.js"></script>
 
 </body>
 
