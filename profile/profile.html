@@ -243,6 +243,46 @@
 
   </section>
 
+
+  <!-- FINAL PROJECT: LIVE SHOPPING DASHBOARD -->
+  <section class="dashboard-section" aria-labelledby="dashboardTitle">
+    <div class="dashboard-heading">
+      <div>
+        <h2 id="dashboardTitle">SHOPPING DASHBOARD</h2>
+        <p>Statistics based on your saved orders and favorites</p>
+      </div>
+      <button type="button" id="refreshDashboard" class="dashboard-refresh">REFRESH STATS</button>
+    </div>
+
+    <div class="dashboard-metrics" aria-label="Shopping summary">
+      <div class="dashboard-metric">
+        <span class="dashboard-metric-label">Total Spent</span>
+        <strong id="dashboardSpent">$0.00</strong>
+      </div>
+      <div class="dashboard-metric">
+        <span class="dashboard-metric-label">Average Order</span>
+        <strong id="dashboardAverage">$0.00</strong>
+      </div>
+      <div class="dashboard-metric">
+        <span class="dashboard-metric-label">Items Purchased</span>
+        <strong id="dashboardItems">0</strong>
+      </div>
+      <div class="dashboard-metric">
+        <span class="dashboard-metric-label">Favorite Products</span>
+        <strong id="dashboardFavorites">0</strong>
+      </div>
+    </div>
+
+    <div class="dashboard-chart-panel">
+      <div class="dashboard-chart-heading">
+        <h3>MONTHLY SPENDING</h3>
+        <span>Last 6 months · USD</span>
+      </div>
+      <p id="dashboardEmpty" class="dashboard-empty" hidden>No orders yet. Complete a purchase to see your spending chart.</p>
+      <div id="dashboardChart" class="dashboard-chart" role="img" aria-label="Monthly spending over the last six months"></div>
+    </div>
+  </section>
+
   <section class="orders-section">
 
     <div class="orders-header">
@@ -346,6 +386,7 @@
 ></script>
 
 <script src="profile.js"></script>
+<script src="dashboard.js"></script>
 
 </body>
 </html>
