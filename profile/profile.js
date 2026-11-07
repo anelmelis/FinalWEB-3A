@@ -289,3 +289,14 @@ profileLogoutBtn.addEventListener("click", () => {
     localStorage.removeItem("profileName");
     localStorage.removeItem("profileEmail");
 });
+
+
+const logoutBtn = document.querySelector(".profile-btn.logout");
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("md_user");
+        localStorage.removeItem("profileName");
+        localStorage.removeItem("profileEmail");
+    });
+}

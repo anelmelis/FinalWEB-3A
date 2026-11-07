@@ -13,8 +13,9 @@ $(document).ready(function () {
     
     $('#logout-btn').on('click', function () {
       localStorage.removeItem('md_user');
-      localStorage.removeItem('profileName');
-      localStorage.removeItem('profileEmail');
+      localStorage.removeItem("profileName");
+      localStorage.removeItem("profileEmail");
+      
       window.location.reload();
     });
   }
