@@ -1,5 +1,12 @@
 const TAX_RATE = 0.08;
 
+
+const DELIVERY = {
+  pickup: { name: 'Store pickup', fee: 0, note: 'Collect your order at the store. No shipping fee.' },
+  standard: { name: 'Standard delivery', fee: 6, note: 'Standard shipping fee: $6.00.' },
+  express: { name: 'Express delivery', fee: 12, note: 'Express shipping fee: $12.00.' },
+};
+
 const METHODS = {
   card: { name: 'Card', pay: 'by card' },
   crypto: { name: 'Crypto', pay: 'with crypto' },
@@ -56,10 +63,39 @@ const successEl = document.getElementById('success');
 
 const user = readStore('md_user', null);
 
-const lines = readStore('md_cart', []);
+const storedLines = readStore('md_cart', []);
+const lines = Array.isArray(storedLines) ? storedLines.filter(line => line && Number.isFinite(Number(line.price)) && Number.isFinite(Number(line.qty))) : [];
 const subtotal = lines.reduce((sum, line) => sum + line.price * line.qty, 0);
 const tax = subtotal * TAX_RATE;
-const total = subtotal + tax;
+const deliveryEl = document.getElementById('delivery-method');
+const deliveryFields = document.getElementById('delivery-fields');
+const deliveryNote = document.getElementById('delivery-note');
+const deliveryNameEl = document.getElementById('delivery-name');
+const deliveryAddressEl = document.getElementById('delivery-address');
+const deliveryCityEl = document.getElementById('delivery-city');
+const deliveryPostalEl = document.getElementById('delivery-postal');
+
+function selectedDelivery() {
+  return DELIVERY[deliveryEl.value] || DELIVERY.pickup;
+}
+
+function shippingFee() { return selectedDelivery().fee; }
+function checkoutTotal() { return subtotal + tax + shippingFee(); }
+
+function updateDelivery() {
+  const hasDelivery = deliveryEl.value !== 'pickup';
+  deliveryFields.hidden = !hasDelivery;
+  deliveryNote.textContent = selectedDelivery().note;
+  [deliveryNameEl, deliveryAddressEl, deliveryCityEl, deliveryPostalEl].forEach((field) => {
+    field.disabled = !hasDelivery;
+    field.required = hasDelivery;
+    if (!hasDelivery) showFieldError(field, '');
+  });
+  showFieldError(deliveryEl, '');
+  updateForm();
+}
+
+deliveryEl.addEventListener('change', updateDelivery);
 
 let orderNumber = readStore('md_order', null);
 if (!orderNumber) {
@@ -96,8 +132,10 @@ function renderReceipt() {
     <hr>
     ${itemsHtml}
     <hr>
+    <div class="receipt__row"><span>Subtotal</span><span>${formatPrice(subtotal)}</span></div>
     <div class="receipt__row"><span>Tax (${Math.round(TAX_RATE * 100)}%)</span><span>${formatPrice(tax)}</span></div>
-    <div class="receipt__row receipt__total"><span>Total</span><span>${formatPrice(total)}</span></div>`;
+    <div class="receipt__row"><span>Delivery (${escapeHtml(selectedDelivery().name)})</span><span>${formatPrice(shippingFee())}</span></div>
+    <div class="receipt__row receipt__total"><span>Total</span><span>${formatPrice(checkoutTotal())}</span></div>`;
 
   updateClock();
 }
@@ -123,7 +161,7 @@ function updateForm() {
 
   submitBtn.disabled = lines.length === 0;
   submitBtn.textContent = lines.length
-    ? `Pay ${formatPrice(total)} ${METHODS[method].pay}`
+    ? `Pay ${formatPrice(checkoutTotal())} ${METHODS[method].pay}`
     : 'Your cart is empty';
 
   renderReceipt();
@@ -375,6 +413,18 @@ function validatePaymentForm() {
     }
 
 
+    // FINAL: validate dependent shipping fields only when delivery is selected.
+    if (deliveryEl.value !== 'pickup') {
+      [
+        [deliveryNameEl, 'Enter the recipient name.'],
+        [deliveryAddressEl, 'Enter a street address.'],
+        [deliveryCityEl, 'Enter a city.'],
+        [deliveryPostalEl, 'Enter a postal code.'],
+      ].forEach(([field, message]) => {
+        if (!field.value.trim()) reject(field, message);
+      });
+    }
+
     // Focus first invalid field
     if (firstInvalid) {
         firstInvalid.focus();
@@ -456,7 +506,20 @@ function saveCompletedOrder() {
 
         })),
 
-        total: Number(total.toFixed(2)),
+        total: Number(checkoutTotal().toFixed(2)),
+
+        // Shipping data, never payment credentials
+        delivery: {
+          method: deliveryEl.value,
+          label: selectedDelivery().name,
+          fee: shippingFee(),
+          ...(deliveryEl.value === 'pickup' ? {} : {
+            recipient: deliveryNameEl.value.trim(),
+            address: deliveryAddressEl.value.trim(),
+            city: deliveryCityEl.value.trim(),
+            postalCode: deliveryPostalEl.value.trim()
+          })
+        },
 
         status: "Processing",
 
@@ -548,4 +611,4 @@ formEl.addEventListener("submit", (event) => {
 
 
 if (user && user.email) emailEl.value = user.email;
-updateForm();
+updateDelivery();

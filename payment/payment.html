@@ -84,6 +84,48 @@
           <input id="pay-email" type="email" placeholder="you@example.com" autocomplete="email" required>
         </div>
 
+        
+<!-- FINAL: Advanced Checkout -->
+<fieldset class="delivery-options">
+  <legend>Delivery options</legend>
+
+  <div class="field">
+    <label for="delivery-method">Delivery method</label>
+    <select id="delivery-method">
+      <option value="pickup">Store pickup — Free</option>
+      <option value="standard">Standard delivery — $6.00</option>
+      <option value="express">Express delivery — $12.00</option>
+    </select>
+  </div>
+
+  <div id="delivery-fields" class="delivery-fields" hidden>
+    <div class="field">
+      <label for="delivery-name">Recipient name</label>
+      <input id="delivery-name" type="text" maxlength="80" autocomplete="name" placeholder="Full name">
+    </div>
+
+    <div class="field">
+      <label for="delivery-address">Street address</label>
+      <input id="delivery-address" type="text" maxlength="160" autocomplete="street-address" placeholder="Street, building, apartment">
+    </div>
+
+    <div class="field">
+      <label for="delivery-city">City</label>
+      <input id="delivery-city" type="text" maxlength="80" autocomplete="address-level2" placeholder="City">
+    </div>
+
+    <div class="field">
+      <label for="delivery-postal">Postal code</label>
+      <input id="delivery-postal" type="text" maxlength="16" autocomplete="postal-code" placeholder="Postal code">
+    </div>
+  </div>
+
+  <p id="delivery-note" class="delivery-note" aria-live="polite">
+    Collect your order at the store. No shipping fee.
+  </p>
+</fieldset>
+
+
         <button class="btn btn--primary" id="submit-btn" type="submit">Pay</button>
         <p class="small">  DEMO ONLY: use fictional test card details.  No payment is processed and card details are not stored. </p>
         </form>

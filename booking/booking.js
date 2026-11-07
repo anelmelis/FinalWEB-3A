@@ -11,9 +11,39 @@ const PREVIOUS = [
 
 const CART_KEY = 'md_cart';
 
+// FINAL: OOP. Each cart line is a real CartItem instance.
+class CartItem {
+  constructor(id, name, price, qty = 1) {
+    this.id = String(id);
+    this.name = String(name);
+    this.price = Number(price);
+    this.qty = Math.max(1, Math.floor(Number(qty)));
+  }
+
+  changeQuantity(delta) {
+    this.qty = Math.max(0, this.qty + delta);
+  }
+
+  lineTotal() {
+    return this.price * this.qty;
+  }
+
+  toJSON() {
+    return { id: this.id, name: this.name, price: this.price, qty: this.qty };
+  }
+
+  static fromJSON(data) {
+    if (!data || typeof data.id !== 'string' || typeof data.name !== 'string' ||
+        !Number.isFinite(Number(data.price)) || Number(data.price) < 0 ||
+        !Number.isInteger(Number(data.qty)) || Number(data.qty) < 1) return null;
+    return new CartItem(data.id, data.name, data.price, data.qty);
+  }
+}
+
 function loadCart() {
   try {
-    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    const stored = JSON.parse(localStorage.getItem(CART_KEY));
+    return Array.isArray(stored) ? stored.map(CartItem.fromJSON).filter(Boolean) : [];
   } catch (error) {
     return [];
   }
@@ -30,15 +60,15 @@ const Cart = {
   add(item) {
     const lines = loadCart();
     const line = lines.find((l) => l.id === item.id);
-    if (line) line.qty += 1;
-    else lines.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+    if (line) line.changeQuantity(1);
+    else if (item) lines.push(new CartItem(item.id, item.name, item.price));
     saveCart(lines);
   },
   change(id, delta) {
     const lines = loadCart();
     const line = lines.find((l) => l.id === id);
     if (!line) return;
-    line.qty += delta;
+    line.changeQuantity(delta);
     saveCart(lines.filter((l) => l.qty > 0));
   },
   remove(id) {
@@ -52,7 +82,7 @@ const Cart = {
     return loadCart().reduce((sum, l) => sum + l.qty, 0);
   },
   total() {
-    return loadCart().reduce((sum, l) => sum + l.price * l.qty, 0);
+    return loadCart().reduce((sum, l) => sum + l.lineTotal(), 0);
   },
 };
 

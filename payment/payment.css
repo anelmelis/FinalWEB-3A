@@ -165,3 +165,39 @@ h1 { margin: 0; font-size: clamp(1.6rem, 3.2vw, 2.3rem); line-height: 1.25; }
     text-decoration: underline;
     font-weight: 700;
 }
+
+/* FINAL: delivery options; follows existing checkout styling */
+
+
+.delivery-options {
+  border: 1px solid var(--olive-soft);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.delivery-options legend {
+  float: none;
+  width: auto;
+  padding: 0 6px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.delivery-fields {
+  display: grid;
+  gap: 12px;
+}
+
+.delivery-fields[hidden] {
+  display: none;
+}
+
+.delivery-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
