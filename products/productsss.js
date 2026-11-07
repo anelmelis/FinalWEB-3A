@@ -122,7 +122,8 @@ function getSavedProducts() {
 
     try {
 
-        return JSON.parse(storedProducts);
+        const parsed = JSON.parse(storedProducts);
+        return Array.isArray(parsed) ? parsed : [];
 
     } catch (error) {
 

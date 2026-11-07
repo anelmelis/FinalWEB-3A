@@ -23,33 +23,30 @@ const editProfileBtn =
   document.getElementById("editProfileBtn");
 
 
+// FINAL: Handle invalid or unexpected localStorage values safely.
+function readStoredArray(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch (error) {
+    console.warn(`Could not read ${key}; using an empty list.`, error);
+    return [];
+  }
+}
+
 function loadProfileData() {
 
-  const savedProducts =
-    JSON.parse(
-      localStorage.getItem("savedProducts")
-    ) || [];
+  const savedProducts = readStoredArray("savedProducts");
+  const cart = readStoredArray("md_cart");
 
-  const cart =
-    JSON.parse(
-      localStorage.getItem("md_cart")
-    ) || [];
+  savedCount.textContent = savedProducts.length;
 
+  const totalCartItems = cart.reduce((total, item) => {
+    const qty = Number(item && item.qty);
+    return total + (Number.isFinite(qty) && qty > 0 ? qty : 1);
+  }, 0);
 
-  savedCount.textContent =
-    savedProducts.length;
-
-
-  const totalCartItems =
-    cart.reduce(
-      (total, item) =>
-        total + (item.qty || 1),
-      0
-    );
-
-
-  cartCount.textContent =
-    totalCartItems;
+  cartCount.textContent = totalCartItems;
 
 
 // Read user data from registration
