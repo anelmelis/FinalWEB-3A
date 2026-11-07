@@ -52,12 +52,30 @@ function loadProfileData() {
     totalCartItems;
 
 
-  const storedName =
+// Read user data from registration
+let currentUser = null;
+
+try {
+    currentUser = JSON.parse(
+        localStorage.getItem("md_user") || "null"
+    );
+} catch (error) {
+    console.error("Could not load user:", error);
+}
+
+const registeredName = currentUser
+    ? [currentUser.name, currentUser.surname]
+        .filter(Boolean)
+        .join(" ")
+    : "";
+
+const storedName = registeredName ||
     localStorage.getItem("profileName");
 
-
-  const storedEmail =
+const storedEmail = (currentUser && currentUser.email) ||
     localStorage.getItem("profileEmail");
+
+
 
 
   if (storedName) {
@@ -85,48 +103,73 @@ function loadProfileData() {
 }
 
 
-editProfileBtn.addEventListener(
-  "click",
-  () => {
 
-    const newName =
-      prompt(
-        "Enter your name:",
+// ========================================
+// EDIT PROFILE
+// ========================================
+
+editProfileBtn.addEventListener("click", () => {
+
+    const newName = prompt(
+        "Enter your full name:",
         profileName.textContent
-      );
+    );
 
+    if (newName === null) return;
 
-    if (newName && newName.trim()) {
-
-      localStorage.setItem(
-        "profileName",
-        newName.trim()
-      );
-
-    }
-
-
-    const newEmail =
-      prompt(
+    const newEmail = prompt(
         "Enter your email:",
         profileEmail.textContent
-      );
+    );
 
+    if (newEmail === null) return;
 
-    if (newEmail && newEmail.trim()) {
+    const name = newName.trim();
+    const email = newEmail.trim();
 
-      localStorage.setItem(
-        "profileEmail",
-        newEmail.trim()
-      );
-
+    // Validate profile data
+    if (name.length < 2) {
+        alert("Name must contain at least 2 characters.");
+        return;
     }
 
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email)) {
+        alert("Please enter a valid email address.");
+        return;
+    }
+
+    // Save profile data
+    localStorage.setItem("profileName", name);
+    localStorage.setItem("profileEmail", email);
+
+    // Synchronize with registered user
+    try {
+        const user = JSON.parse(
+            localStorage.getItem("md_user") || "null"
+        );
+
+        if (user && typeof user === "object" && !Array.isArray(user)) {
+
+            const nameParts = name.split(/\s+/);
+
+            user.name = nameParts[0];
+            user.surname = nameParts.slice(1).join(" ");
+            user.email = email;
+
+            localStorage.setItem(
+                "md_user",
+                JSON.stringify(user)
+            );
+        }
+
+    } catch (error) {
+        console.error("Could not update user:", error);
+    }
 
     loadProfileData();
-
-  }
-);
+});
 
 
 loadProfileData();
