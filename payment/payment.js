@@ -472,23 +472,12 @@ methodTabs.addEventListener(
 
 function saveCompletedOrder() {
 
-    const storedOrders =
-        readStore("md_orders", []);
+    const orders = window.MineDropAccounts.getOrders();
 
-    const orders = Array.isArray(storedOrders)
-        ? storedOrders
-        : [];
-
-
-    // Avoid duplicate orders
-    if (
-        orders.some(
-            order => order.id === orderNumber
-        )
-    ) {
+    // Avoid duplicate orders for this account (or the guest session).
+    if (orders.some(order => order && order.id === orderNumber)) {
         return true;
     }
-
 
     // Create order object
     const order = {
@@ -531,10 +520,7 @@ function saveCompletedOrder() {
 
     // Save only order details,
     // never card or wallet information
-    return writeStore(
-        "md_orders",
-        [...orders, order]
-    );
+    return window.MineDropAccounts.saveOrder(order);
 }
 
 

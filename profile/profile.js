@@ -66,11 +66,8 @@ const registeredName = currentUser
         .join(" ")
     : "";
 
-const storedName = registeredName ||
-    localStorage.getItem("profileName");
-
-const storedEmail = (currentUser && currentUser.email) ||
-    localStorage.getItem("profileEmail");
+const storedName = registeredName || "Guest";
+const storedEmail = (currentUser && currentUser.email) || "Not signed in";
 
 
 
@@ -137,32 +134,11 @@ editProfileBtn.addEventListener("click", () => {
         return;
     }
 
-    // Save profile data
-    localStorage.setItem("profileName", name);
-    localStorage.setItem("profileEmail", email);
-
-    // Synchronize with registered user
-    try {
-        const user = JSON.parse(
-            localStorage.getItem("md_user") || "null"
-        );
-
-        if (user && typeof user === "object" && !Array.isArray(user)) {
-
-            const nameParts = name.split(/\s+/);
-
-            user.name = nameParts[0];
-            user.surname = nameParts.slice(1).join(" ");
-            user.email = email;
-
-            localStorage.setItem(
-                "md_user",
-                JSON.stringify(user)
-            );
-        }
-
-    } catch (error) {
-        console.error("Could not update user:", error);
+    // Keep the same stable account ID if the email changes.
+    // Reject email addresses belonging to a different demo account.
+    if (!window.MineDropAccounts.updateProfile(name, email)) {
+        alert("Please log in first, or choose an email not used by another account.");
+        return;
     }
 
     loadProfileData();
@@ -177,17 +153,7 @@ loadProfileData();
 
 // Get orders from localStorage
 function getOrders() {
-    try {
-        const orders = JSON.parse(
-            localStorage.getItem("md_orders") || "[]"
-        );
-
-        return Array.isArray(orders) ? orders : [];
-
-    } catch (error) {
-        console.error("Could not load orders:", error);
-        return [];
-    }
+    return window.MineDropAccounts.getOrders();
 }
 
 

@@ -1,6 +1,6 @@
 // FINAL PROJECT: Statistics Dashboard
-// Reads the exact localStorage keys already used by Payment and Saved.
-// It never modifies orders, favorites, or the existing Profile code.
+// Orders are account-scoped via MineDropAccounts; favorites remain browser-scoped.
+// It does not modify either dataset.
 (() => {
   "use strict";
 
@@ -42,7 +42,8 @@
   }
 
   function calculateStats() {
-    const orders = readArray("md_orders").filter(order => order && typeof order === "object" && !Array.isArray(order));
+    const orders = window.MineDropAccounts.getOrders()
+      .filter(order => order && typeof order === "object" && !Array.isArray(order));
     const favorites = readArray("savedProducts");
     const totalSpent = orders.reduce((sum, order) => sum + safeAmount(order.total), 0);
     const purchasedItems = orders.reduce((sum, order) => {
@@ -107,7 +108,8 @@
 
   document.getElementById("refreshDashboard")?.addEventListener("click", renderDashboard);
   window.addEventListener("storage", event => {
-    if (event.key === "md_orders" || event.key === "savedProducts" || event.key === null) renderDashboard();
+    if (event.key === null || event.key === "savedProducts" || event.key === "md_user" ||
+        (event.key && event.key.startsWith("md_account_orders_v1_"))) renderDashboard();
   });
   renderDashboard();
 })();

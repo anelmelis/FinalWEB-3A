@@ -176,10 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
       isLoggedIn: true
     };
 
-    localStorage.setItem(
-      'md_user',
-      JSON.stringify(demoUser)
-    );
+    if (!window.MineDropAccounts.signIn(demoUser, true)) {
+      showAlert('Could not save demo account. Please try again.', 'danger');
+      return;
+    }
 
     showAlert(
       'Logged in with Google Demo! Redirecting...',
@@ -268,10 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
         isLoggedIn: true
       };
 
-      localStorage.setItem(
-        'md_user',
-        JSON.stringify(userData)
-      );
+      if (!window.MineDropAccounts.signIn(userData, true)) {
+        showAlert('Could not save registration. Please try again.', 'danger');
+        return;
+      }
 
       showAlert(
         'Registration successful! Redirecting...',
@@ -303,54 +303,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setFieldStatus(emailInput, isEmailValid);
 
     if (isEmailValid) {
-      const existingUserRaw =
-        localStorage.getItem('md_user');
-
-      let userData;
-
-      if (existingUserRaw) {
-        try {
-          userData = JSON.parse(existingUserRaw);
-        } catch (error) {
-          console.warn('Invalid saved user data:', error);
-        }
-
-        if (
-          !userData ||
-          typeof userData !== 'object' ||
-          Array.isArray(userData)
-        ) {
-          userData = {};
-        }
-
-        userData.name =
-          userData.name || emailInput.value.split('@')[0];
-
-        userData.surname =
-          userData.surname || 'User';
-
-        userData.email =
-          emailInput.value.trim();
-
-        userData.isLoggedIn = true;
-
-      } else {
-        const nameFromEmail =
-          emailInput.value.split('@')[0];
-
-        userData = {
-          name: nameFromEmail,
-          surname: 'User',
-          email: emailInput.value.trim(),
-          phone: '+70000000000',
-          isLoggedIn: true
-        };
+      // Sign in using the entered email. Never reuse a different user's name.
+      const userData = window.MineDropAccounts.signIn({
+        email: emailInput.value.trim()
+      });
+      if (!userData) {
+        showAlert('Could not open this demo account.', 'danger');
+        return;
       }
-
-      localStorage.setItem(
-        'md_user',
-        JSON.stringify(userData)
-      );
 
       showAlert(
         'Log in successful! Redirecting...',

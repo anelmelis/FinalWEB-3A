@@ -327,8 +327,16 @@ $(document).ready(function () {
           data && data.rates && data.rates.KZT
         );
 
+        // EMPTY DATA STATE: the API responded, but no usable KZT rate was sent.
         if (!Number.isFinite(rate) || rate <= 0) {
-          throw new Error('Valid KZT rate missing');
+          currentRate = fallbackRate;
+          usingFallback = true;
+          $status.text('No exchange rate data available.');
+          $rateDetails.text(
+            'No usable KZT rate was returned. Showing an approximate offline estimate (485 KZT).'
+          );
+          renderConversion(currentRate, usingFallback);
+          return;
         }
 
         // Success state
