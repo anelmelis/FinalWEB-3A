@@ -1,20 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // --- 1. GLOBAL DARK MODE LOGIC ---
+  const savedTheme = localStorage.getItem('mineDropTheme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
 
+  const themeBtn = document.getElementById('theme-toggle-btn');
+  if (themeBtn) {
+    if (document.body.classList.contains('dark-mode')) {
+      themeBtn.textContent = '☀️ Light';
+    }
+
+    themeBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      
+      localStorage.setItem('mineDropTheme', isDark ? 'dark' : 'light');
+      themeBtn.textContent = isDark ? '☀️ Light' : '🌙 Theme';
+    });
+  }
+
+  
   const welcomeView = document.getElementById('welcome-view');
   const registerView = document.getElementById('register-view');
   const loginView = document.getElementById('login-view');
   const backBtn = document.getElementById('back-btn');
   const authAlert = document.getElementById('auth-alert');
 
-
   const btnShowRegister = document.getElementById('btn-show-register');
   const btnShowLogin = document.getElementById('btn-show-login');
   const btnGoogleDemo = document.getElementById('btn-google-demo');
 
-
   const registerForm = document.getElementById('register-form');
   const loginForm = document.getElementById('login-form');
-
 
   function showView(view) {
     welcomeView.classList.add('d-none');
@@ -37,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
   btnShowRegister.addEventListener('click', () => showView('register'));
   btnShowLogin.addEventListener('click', () => showView('login'));
   backBtn.addEventListener('click', () => showView('welcome'));
-
 
   btnGoogleDemo.addEventListener('click', () => {
     const demoUser = {
@@ -80,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
- 
   registerForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -119,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  
   loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -133,7 +148,16 @@ document.addEventListener('DOMContentLoaded', () => {
       let userData;
 
       if (existingUserRaw) {
-        userData = JSON.parse(existingUserRaw);
+        try {
+          userData = JSON.parse(existingUserRaw);
+        } catch (error) {
+          console.warn('Invalid saved user data:', error);
+        }
+        if (!userData || typeof userData !== 'object' || Array.isArray(userData)) {
+          userData = {};
+        }
+        userData.name = userData.name || emailInput.value.split('@')[0];
+        userData.surname = userData.surname || 'User';
         userData.email = emailInput.value.trim();
         userData.isLoggedIn = true;
       } else {
